@@ -1,0 +1,124 @@
+---
+title: "Tidy Data"
+author: "Jerry Chee"
+date: "7 March 2019"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## What is 'tidy' data?
+
+If you've been working in Excel sheets for analytical work, learning how to see your data in a 'tidy' format is one of the most important concepts to start with. If you'd like to understand in detail the definition of 'tidy data' and a more comprehensive coverage on methods to achieve it, pls read Hadley Wickham's (Chief Data Scientist at RStudio) [research paper](https://vita.had.co.nz/papers/tidy-data.pdf).
+
+## Let's get started
+
+Here's how a typical dataset in Excel looks like. Likely so because it makes the lives of those keying data much easier and also more readable.
+
+```{r, message = FALSE}
+# Let's quickly load some standard R packages here so that you can follow this article. 
+# If tidyverse is not yet installed, you may do so like such: > install.packages('tidyverse')
+library(tidyverse)
+
+# Creating some dummy data about exam results across different students and terms
+myresults <- data.frame(
+  Names = c("Angela", "Bryce", "Charlie"),
+  Term1 = c(20, 80, 10),
+  Term2 = c(30, 70, 50),
+  Term3 = c(90, 80, 30))
+```
+The shape of the data here is helpful because we can quickly assess results either by student (by rows) or by term (by columns).
+```{r}
+myresults
+
+```
+
+## Conducting some simple analysis the Excel-way...
+
+OKAY, hold your horses. We're getting there!
+
+Let's first calculate a simple statistic such as the **average result** per student *and* per term. 
+
+This is how you'd have likely done it in Excel:
+
+1. Calculate average per student in the column next to Term3
+2. Calculate average per term in the row below Charlie
+
+```{r, echo = FALSE}
+cbind(myresults, StudentAVG = round(rowMeans(myresults[,-1]),1))
+termAVG <- as.numeric(colMeans(myresults[,-1])) %>% round(1)
+rbind(myresults, data.frame(Names = "TermAVG", Term1 = termAVG[1], Term2 = termAVG[2], Term3 = termAVG[3]))
+```
+
+It is unlikely for anything to go wrong if your dataset is this small, but adding new columns and new rows to your core dataset is not a sustainable practice, especially when your dataset is significantly larger and/or constantly updated. A common gripe about working in Excel with large datasets is either mispointed cell ranges or broken links caused by physically moving the data across cells.
+
+Excel, while excellent for allowing one to 'touch' every single data point, fails quickly when you have an increasing number of datasets that you need to perform calculations on.
+
+## So how can I work better?
+
+'Tidy'-ing your data simply means to discern between variables and values. In our example here, there are 3 variables and their corresponding values in brackets.
+
+1. **Names** (Angela, Bryce, Charlie)
+2. **Examination terms** (1, 2, 3)
+3. **Examination results** (10, 20, 30, ... , 90)
+
+What we've been accustomed to, as Excel users, is to co-mingle variables with values.
+
+Let's put our variables and values where they're supposed to be!
+```{r}
+myresults.tidy <- myresults %>%
+  gather(key = Term, value = Result, -Names)
+
+myresults.tidy
+```
+
+Notice what's different about our dataset? We now have 3 columns, corresponding to the 3 **variables** we identified earlier.
+
+The **structure** of the dataset has changed and it has become **longer**!
+
+This looks like it has been transposed, but notice that unlike transpose, which only switches rows to columns and vice-versa, we've actually created more data!
+
+Each name is now duplicated 3 times, because it has to appear once per term.
+
+The corresponding examination results are now displayed in the column titled *Result*.
+
+While this is admittedly less readable than our initial form, this data structure is meant to allow us to perform analysis quicker and make code more readable.
+
+
+## How to use tidy data?
+
+Let's perform the same average calculations as done before, but leveraging on the new data structure!
+
+```{r}
+# Student averages
+myresults.tidy %>% 
+  group_by(Names) %>%
+  summarise(StudentAVG = mean(Result))
+
+# Term averages
+myresults.tidy %>% 
+  group_by(Term) %>% 
+  summarise(TermAVG = mean(Result))
+```
+
+The benefit of working on tidy data may not be apparent yet, but will be once you begin working on more dimensions to your data.
+
+An example where this dataset could get more complicated...
+
+```{r}
+myInfo <- data.frame(Names = myresults$Names, 
+                     Race = c("Chinese","Indian","Chinese"), 
+                     Town = c("East Coast","Bedok","Yishun"))
+
+myresults.tidy %>% left_join(myInfo)
+```
+
+One might ask additional questions such as
+
+* What is the average result per Town?
+* What is the average result per Race?
+* What is the average result per Race within each Town?
+
+We'll explore the power of tidy data in subsequent articles.

@@ -32,16 +32,16 @@ head(mydata, 10)
 ```
 
     ##                    Sector    Geo Returns
-    ## 1              Technology Europe    0.05
-    ## 2  Consumer Discretionary  India   -0.06
-    ## 3  Consumer Discretionary     US   -0.15
-    ## 4  Consumer Discretionary Europe   -0.05
-    ## 5  Consumer Discretionary   Asia    0.00
-    ## 6      Financial Services Europe    0.17
-    ## 7  Consumer Discretionary  India    0.21
-    ## 8              Technology     US   -0.01
-    ## 9              Technology  India   -0.01
-    ## 10             Technology   Asia   -0.17
+    ## 1              Technology Europe    0.07
+    ## 2      Financial Services Europe   -0.01
+    ## 3  Consumer Discretionary   Asia   -0.08
+    ## 4             Real Estate   Asia    0.01
+    ## 5              Technology   Asia    0.41
+    ## 6              Technology Europe    0.23
+    ## 7      Financial Services  India    0.06
+    ## 8      Financial Services     US    0.14
+    ## 9              Technology Europe    0.07
+    ## 10     Financial Services Europe   -0.13
 
 A few things we'd like to ask our data:
 
@@ -68,22 +68,22 @@ myAvgRet
     ## # Groups:   Sector [?]
     ##    Sector                 Geo    AVGreturns
     ##    <chr>                  <chr>       <dbl>
-    ##  1 Consumer Discretionary Asia       0.0531
-    ##  2 Consumer Discretionary Europe     0.0874
-    ##  3 Consumer Discretionary India      0.0530
-    ##  4 Consumer Discretionary US         0.0654
-    ##  5 Financial Services     Asia       0.0771
-    ##  6 Financial Services     Europe     0.0681
-    ##  7 Financial Services     India      0.0735
-    ##  8 Financial Services     US         0.0557
-    ##  9 Real Estate            Asia       0.0845
-    ## 10 Real Estate            Europe     0.0582
-    ## 11 Real Estate            India      0.095 
-    ## 12 Real Estate            US         0.0917
-    ## 13 Technology             Asia       0.0620
-    ## 14 Technology             Europe     0.103 
-    ## 15 Technology             India      0.102 
-    ## 16 Technology             US         0.0837
+    ##  1 Consumer Discretionary Asia       0.0793
+    ##  2 Consumer Discretionary Europe     0.131 
+    ##  3 Consumer Discretionary India      0.0646
+    ##  4 Consumer Discretionary US         0.0644
+    ##  5 Financial Services     Asia       0.0628
+    ##  6 Financial Services     Europe     0.0979
+    ##  7 Financial Services     India      0.104 
+    ##  8 Financial Services     US         0.0912
+    ##  9 Real Estate            Asia       0.0530
+    ## 10 Real Estate            Europe     0.101 
+    ## 11 Real Estate            India      0.0647
+    ## 12 Real Estate            US         0.0928
+    ## 13 Technology             Asia       0.101 
+    ## 14 Technology             Europe     0.0946
+    ## 15 Technology             India      0.0757
+    ## 16 Technology             US         0.0795
 
 Heatmap plotting - Quick and dirty
 ----------------------------------
@@ -107,27 +107,43 @@ myAvgRet.mat
 ```
 
     ##                              Asia     Europe      India         US
-    ## Consumer Discretionary 0.05305085 0.08742424 0.05295082 0.06537037
-    ## Financial Services     0.07706897 0.06808824 0.07347826 0.05566667
-    ## Real Estate            0.08447761 0.05824561 0.09500000 0.09169014
-    ## Technology             0.06202703 0.10348485 0.10186047 0.08368421
+    ## Consumer Discretionary 0.07926471 0.13133333 0.06461538 0.06440000
+    ## Financial Services     0.06283019 0.09791667 0.10362069 0.09120000
+    ## Real Estate            0.05297297 0.10067797 0.06468750 0.09281250
+    ## Technology             0.10142857 0.09461538 0.07568627 0.07953488
 
 ``` r
 # Notice how the column 'Sector' has become data captured as row names?
 str(myAvgRet.mat)
 ```
 
-    ##  num [1:4, 1:4] 0.0531 0.0771 0.0845 0.062 0.0874 ...
+    ##  num [1:4, 1:4] 0.0793 0.0628 0.053 0.1014 0.1313 ...
     ##  - attr(*, "dimnames")=List of 2
     ##   ..$ : chr [1:4] "Consumer Discretionary" "Financial Services" "Real Estate" "Technology"
     ##   ..$ : chr [1:4] "Asia" "Europe" "India" "US"
 
 ``` r
 # use base heatmap to plot
-heatmap(myAvgRet.mat, Colv = NA, Rowv = NA, scale = "column")
+plot1 <- heatmap(myAvgRet.mat, Colv = NA, Rowv = NA, scale = "column")
 ```
 
 ![](IntroHeatmap_files/figure-markdown_github-ascii_identifiers/unnamed-chunk-3-1.png)
+
+``` r
+print(plot1)
+```
+
+    ## $rowInd
+    ## [1] 1 2 3 4
+    ## 
+    ## $colInd
+    ## [1] 1 2 3 4
+    ## 
+    ## $Rowv
+    ## NULL
+    ## 
+    ## $Colv
+    ## NULL
 
 That was fairly quick, wasn't it?
 

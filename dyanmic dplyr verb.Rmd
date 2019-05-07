@@ -1,0 +1,41 @@
+---
+title: "Dynamic dplyr"
+author: "JerryC"
+date: "8 May 2019"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## What is 'dynamic' dplyr and why do I need it?
+Truthfully, this is better known as *standard evaluation* and have actually been deprecated. This functionality comes in useful when you're incorporating dplyr verbs within your own custom functions and wish to pass an expandable list of arguments into the dplyr verbs.
+
+Let's see an example with the mpg dataset from ggplot2 package
+
+```{r}
+#Load packages
+library(ggplot2)
+library(tidyverse)
+```
+Peek at mpg dataset
+```{r, message=F}
+head(mpg)
+
+#Aggregate mean fuel consumption on highway for each car manufacturer
+mpg %>% group_by(manufacturer) %>% summarise(hwy_mean = mean(hwy))
+
+#My custom function
+my_hwymean <- function(df, ...) {
+  #... here allows us to pass any number of arguments to our function
+  mydf <- df %>% group_by_(...) %>% summarise(hwy_mean = mean(hwy))
+  return(mydf)
+}
+
+#Aggregate by both manufacturer and model
+my_hwymean(mpg, 'manufacturer', 'model')
+#Aggregate by transition type, in addition to manufacturer and model
+my_hwymean(mpg, 'manufacturer', 'model', 'trans')
+```
+

@@ -115,3 +115,17 @@ my_hwymean(mpg, 'manufacturer', 'model', 'trans')
     ##  9 audi         a6 quattro auto(l5)       24.0
     ## 10 audi         a6 quattro auto(s6)       24.0
     ## # ... with 103 more rows
+
+Additional tip: Sometimes you want to be using standardised references in all functional calls, regardless of what type of analysis is being done
+
+``` t
+# Assuming each analysis minimally looks at manufacturer as a group, so there's no point in requiring yourself to type 'manufacturer' into your custom function each time
+
+my_mfgmean <- function(df, ...){
+  mydf <- df %>% group_by_("manufacturer", ...) %>% summarise(hwy_mean = mean(hwy))
+  return(mydf)
+}
+
+my_mfmean(mpg, 'model')
+my_mfmean(mpg, 'model', 'trans')
+```

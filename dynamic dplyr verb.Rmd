@@ -1,0 +1,76 @@
+---
+title: "Dynamic dplyr"
+author: "Jerry Chee"
+date: "8 May 2019"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Why did I look into this?
+Have you been in a situation where you've written a custom function to summarise data, but find yourself creating several versions of this function depending on different levels of `group_by`? For instance in my work, I often find myself needing to analyse investments in groups or sub-groups such as 1)sectors OR geography, 2)sector AND geography. 
+
+What if it gets even dicier with multi-level groups such as sector + subsector + geography + holding period + portfolio weight and you cannot pre-determine before-hand how many combinations of these groups you might need in your work?
+
+## Is there such as thing as 'dynamic' `dplyr`?
+
+Truthfully, this is better known as *standard evaluation* and it has actually been deprecated. This functionality only comes in useful when you're incorporating dplyr verbs within your own custom functions and wish to pass an expandable list of arguments into the `dplyr` verbs.
+
+Let's see an example with the mpg dataset from `ggplot2` package
+
+```{r, message=FALSE, warning=FALSE}
+#Load packages
+library(ggplot2)
+library(tidyverse)
+```
+
+Refresh ourselves of the `mpg` data...
+```{r, message=F}
+head(mpg)
+```
+
+##### Aggregate mean fuel consumption on highway roads for each car manufacturer
+
+```{r}
+#Aggregate mean fuel consumption on highway for each car manufacturer
+mpg %>% group_by(manufacturer) %>% summarise(hwy_mean = mean(hwy))
+```
+
+But what if we'd like to do better and write a function that allows us to summarise `mpg` on a number of levels?
+Below is an example of passing additional arguments *(length undetermined beforehand)* with the ellipsis (this thing -> ...)
+
+##### Create a custom summarising function
+```{R}
+#My custom function
+my_hwymean <- function(df, ...) {
+  #... here allows us to pass any number of arguments to our function
+  mydf <- df %>% group_by_(...) %>% summarise(hwy_mean = mean(hwy))
+  return(mydf)
+}
+```
+
+##### Aggregate by any choice(s) of variables
+```{r}
+#By manufacturer AND model
+my_hwymean(mpg, 'manufacturer', 'model') %>% head()
+#By year and class
+my_hwymean(mpg, 'year', 'class') %>% head()
+```
+
+## Additional tip
+Sometimes you want to be using standardised references in all functional calls, regardless of what type of analysis is being done. For this example, imagine if all analysis you're doing requires 'manufacturer' to included minimally. 
+
+You can control for this mechanic by 'hard-coding' the required group into your function. As we're now using the NSE `group_by`, passing variable names into it requires that you enquote it.
+```{r}
+my_mfgmean <- function(df, ...){
+  mydf <- df %>% group_by_("manufacturer", ...) %>% summarise(hwy_mean = mean(hwy))
+  return(mydf)
+}
+```
+Now additional groupings provided through the ellipsis input will be **in addition** to `manufacturer`.
+```{r}
+my_mfgmean(mpg, 'year') %>% head()
+
+my_mfgmean(mpg, 'class', 'trans') %>% head()

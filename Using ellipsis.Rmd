@@ -1,0 +1,65 @@
+---
+title: "Using ellipsis in a function"
+author: "Jerry Chee"
+date: "May 22, 2019"
+output: rmarkdown::github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Ever wondered what the three dots `...` is when you're keying in arguments to a function?
+
+`...` is called the ellipsis, and is a handy way of passing additional arguments to a function without constraints on the length/order.
+
+An immediate use-case for something like this is with the dplyr verbs.
+
+We'll work with the `mtcars` dataset for a simple demonstration.
+
+```{r, message=F, warning=F}
+# Basic set up
+library(dplyr)
+library(tidyr)
+
+# Remind ourselves of what mtcars dataset looks like
+head(mtcars)
+```
+
+Traditional way of counting the number of observations: How many cars within each cylinder group? 
+```{r, message=F, warning=F}
+mtcars %>% group_by(cyl) %>% tally
+
+```
+What if we wanted the ability to do a count based on a varying set of dimensions?
+
+Let's write function to do just that!
+```{r, message=F, warning=F}
+mycount <- function(x, ...){
+  x %>% group_by(...) %>% tally
+}
+```
+
+Now let's ask: How many transmission (`am`) type per gear type?
+```{r,message=F, warning=F}
+mycount(mtcars, gear, am)
+```
+Looks like 3-geared cars is the most populous and all of them being automatic (am = 0) cars!
+
+We could easily ask different questions by dynamically passing the list of dimensions to the `group_by` within our `mycount` function.
+```{r, message=F, warning=F}
+mycount(mtcars, gear, carb, am)
+mycount(mtcars, cyl, carb)
+```
+
+But what if we wanted to always specify the top level group by gear group?
+
+Simple! Just pre-specify that group within your custom function and it will always be there *in addition* to the additional dimensions you provided via the `...`!
+```{r, message=F, warning=F}
+mycount_gear <- function(x, ...){
+  x %>% group_by(gear, ...) %>% tally
+}
+
+#Notice that the result here is exactly the same as in 2 sections above.
+mycount_gear(mtcars, am)
+```
